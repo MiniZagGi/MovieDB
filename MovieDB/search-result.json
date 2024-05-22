@@ -1,0 +1,195 @@
+import json
+
+movieData = {
+    "page": 1,
+    "results": [
+      {
+        "adult": False,
+        "backdrop_path": "/yDbyVT8tTOgXUrUXNkHEUqbxb1K.jpg",
+        "genre_ids": [
+          878,
+          12,
+          14
+        ],
+        "id": 70160,
+        "original_language": "en",
+        "original_title": "The Hunger Games",
+        "overview": "Every year in the ruins of what was once North America, the nation of Panem forces each of its twelve districts to send a teenage boy and girl to compete in the Hunger Games.  Part twisted entertainment, part government intimidation tactic, the Hunger Games are a nationally televised event in which “Tributes” must fight with one another until one survivor remains.  Pitted against highly-trained Tributes who have prepared for these Games their entire lives, Katniss is forced to rely upon her sharp instincts as well as the mentorship of drunken former victor Haymitch Abernathy.  If she’s ever to return home to District 12, Katniss must make impossible choices in the arena that weigh survival against humanity and life against love. The world will be watching.",
+        "popularity": 49.788,
+        "poster_path": "/yXCbOiVDCxO71zI7cuwBRXdftq8.jpg",
+        "release_date": "2012-03-12",
+        "title": "The Hunger Games",
+        "video": False,
+        "vote_average": 7.206,
+        "vote_count": 21417
+      },
+      {
+        "adult": False,
+        "backdrop_path": "/tfRyGlBlsfkCMXpRjMyxG53rbS9.jpg",
+        "genre_ids": [
+          18,
+          878,
+          28
+        ],
+        "id": 695721,
+        "original_language": "en",
+        "original_title": "The Hunger Games: The Ballad of Songbirds & Snakes",
+        "overview": "64 years before he becomes the tyrannical president of Panem, Coriolanus Snow sees a chance for a change in fortunes when he mentors Lucy Gray Baird, the female tribute from District 12.",
+        "popularity": 154.977,
+        "poster_path": "/mBaXZ95R2OxueZhvQbcEWy2DqyO.jpg",
+        "release_date": "2023-11-15",
+        "title": "The Hunger Games: The Ballad of Songbirds & Snakes",
+        "video": False,
+        "vote_average": 7.165,
+        "vote_count": 2153
+      },
+      {
+        "adult": False,
+        "backdrop_path": "/48gojWXx1G2Bs0KFtXYfNJ2naDr.jpg",
+        "genre_ids": [
+          12,
+          28,
+          878
+        ],
+        "id": 101299,
+        "original_language": "en",
+        "original_title": "The Hunger Games: Catching Fire",
+        "overview": "Katniss Everdeen has returned home safe after winning the 74th Annual Hunger Games along with fellow tribute Peeta Mellark. Winning means that they must turn around and leave their family and close friends, embarking on a \"Victor's Tour\" of the districts. Along the way Katniss senses that a rebellion is simmering, but the Capitol is still very much in control as President Snow prepares the 75th Annual Hunger Games (The Quarter Quell) - a competition that could change Panem forever.",
+        "popularity": 73.16,
+        "poster_path": "/uFQbcR7h1stMlN1d3a7RmV0luLZ.jpg",
+        "release_date": "2013-11-15",
+        "title": "The Hunger Games: Catching Fire",
+        "video": False,
+        "vote_average": 7.427,
+        "vote_count": 16878
+      },
+      {
+        "adult": False,
+        "backdrop_path": "/tKBXwHAwahfR4Vkl0KzMjXsKSLm.jpg",
+        "genre_ids": [
+          878,
+          12,
+          53
+        ],
+        "id": 131631,
+        "original_language": "en",
+        "original_title": "The Hunger Games: Mockingjay - Part 1",
+        "overview": "Katniss Everdeen reluctantly becomes the symbol of a mass rebellion against the autocratic Capitol.",
+        "popularity": 140.076,
+        "poster_path": "/4FAA18ZIja70d1Tu5hr5cj2q1sB.jpg",
+        "release_date": "2014-11-19",
+        "title": "The Hunger Games: Mockingjay - Part 1",
+        "video": False,
+        "vote_average": 6.808,
+        "vote_count": 15391
+      },
+      {
+        "adult": False,
+        "backdrop_path": "/1iut9GrFxHXFF4F6PykomPs9qwB.jpg",
+        "genre_ids": [
+          99
+        ],
+        "id": 871533,
+        "original_language": "en",
+        "original_title": "Surviving the Game: Making The Hunger Games: Catching Fire",
+        "overview": "An incredibly in depth and informative compendium of nine featurettes that address virtually every aspect of the film, from the adaptive process through the special effects, stunts and production design. There are a number of really well done interviews with most of the principal cast and crew.",
+        "popularity": 6.545,
+        "poster_path": "/zvO1D3axkIaJvUjfq7FPvahwLv6.jpg",
+        "release_date": "2014-03-07",
+        "title": "Surviving the Game: Making The Hunger Games: Catching Fire",
+        "video": True,
+        "vote_average": 6.1,
+        "vote_count": 8
+      },
+      {
+        "adult": False,
+        "backdrop_path": "/1iut9GrFxHXFF4F6PykomPs9qwB.jpg",
+        "genre_ids": [
+          99
+        ],
+        "id": 514231,
+        "original_language": "en",
+        "original_title": "The Mockingjay Lives: The Making of the Hunger Games: Mockingjay Part 1",
+        "overview": "Documentary film about the making of The Hunger Games: Mockingjay Part 1.  An impressively in depth assortment of seven featurettes that look at a variety of subjects, from casting to visual effects.  - Hope and Rebellion: Continuing the Saga  - Designing Dystopia: Visual Aesthetic  - Rebels and Warriors: The Cast  - Fusing Form and Function: Costume, Make-Up and Hair  - Fighting the System: Shooting on Location  - D13: Rebellion Tactics: Stunts and Special Effects  - Perfecting Panem: The Post-Production Process",
+        "popularity": 8.113,
+        "poster_path": "/5Rjd0jPCDgNvaARNPk8jTTvVfPB.jpg",
+        "release_date": "2015-03-06",
+        "title": "The Mockingjay Lives: The Making of the Hunger Games: Mockingjay Part 1",
+        "video": False,
+        "vote_average": 7.1,
+        "vote_count": 17
+      },
+      {
+        "adult": False,
+        "backdrop_path": "/1iut9GrFxHXFF4F6PykomPs9qwB.jpg",
+        "genre_ids": [
+          99
+        ],
+        "id": 513866,
+        "original_language": "en",
+        "original_title": "The World Is Watching: Making the Hunger Games",
+        "overview": "A feature length, eight part documentary that covers everything from pre-production to adapting the source novel to casting to shooting to post and marketing. This is an amazing in-depth piece and it's notable how many women were involved in this production, from several Lionsgate executives to novelist Suzanne Collins herself. Jennifer Lawrence talks about her \"hypocrisy\" in not wanting to do a big budget blockbuster after having devoted herself to indies (despite X-Men, which she seems to discount somewhat). There's also a nice sequence on the strength and weight training the actors went through and the stunts that are so notable in the film, as well as having to dance around the violence implicit in the story due to the planned PG-13 rating the filmmakers were aiming for.",
+        "popularity": 6.749,
+        "poster_path": "/2bpO6IjqcSOxICVafi9qCc6imie.jpg",
+        "release_date": "2012-08-18",
+        "title": "The World Is Watching: Making the Hunger Games",
+        "video": True,
+        "vote_average": 8.2,
+        "vote_count": 5
+      },
+      {
+        "adult": False,
+        "backdrop_path": None,
+        "genre_ids": [],
+        "id": 1120883,
+        "original_language": "en",
+        "original_title": "Hunger Games: The Second Quarter Quell",
+        "overview": "As described in The Hunger Games: Catching Fire, it portrays the 50th edition of the Hunger Games. In this Quarter Quell, double the amount of tributes are selected to engage in a fight to the death until one remains. That boy was Haymich Abernathy.",
+        "popularity": 2.185,
+        "poster_path": "/vmR6ayeTtenzMutlXYSpz9mhAfq.jpg",
+        "release_date": "2011-07-19",
+        "title": "Hunger Games: The Second Quarter Quell",
+        "video": False,
+        "vote_average": 0,
+        "vote_count": 0
+      },
+      {
+        "adult": False,
+        "backdrop_path": None,
+        "genre_ids": [
+          99
+        ],
+        "id": 1052388,
+        "original_language": "en",
+        "original_title": "The Hunger Games: Letters From The Rose Garden",
+        "overview": "Donald Sutherland talks about how moved he was by the script, which reminded him of Kubrick's Paths of Glory, his role as a repressive leader, and he reads from a letter he sent to director Gary Ross about the role.",
+        "popularity": 2.341,
+        "poster_path": None,
+        "release_date": "2012-08-18",
+        "title": "The Hunger Games: Letters From The Rose Garden",
+        "video": True,
+        "vote_average": 4,
+        "vote_count": 2
+      },
+      {
+        "adult": False,
+        "backdrop_path": "/1iut9GrFxHXFF4F6PykomPs9qwB.jpg",
+        "genre_ids": [
+          99
+        ],
+        "id": 871582,
+        "original_language": "en",
+        "original_title": "Pawns No More: The Making of The Hunger Games: Mockingjay Part 2",
+        "overview": "This making of The Hunger Games: Mockingjay - Part 2 is presented in 8 parts. Each part gives an in depth view of one aspect of creating the movie. You can see how special effects were used; costumes and make-up was done; all about the casting and location of the movie; and much more. This is done by interviews with the cast and crew as well as with fragments from the movie and images from behind the scenes.  - Walking through Fire: Concluding the Saga (13:07)  - Real or Not Real: Visual Design (9:57)  - High Value Targets: The Acting Ensemble (16:33)  - From Head to Toe: Costumes, Make-up and Hair (13:38)  - Navigation the Minefield: Production in Atlanta, Paris and Berlin (13:06)  - Collateral Damage: Stunts, Special Effects and Weapons (18:04)  - Tightening the Noose: The Post-production Process (28:43)  - A Different World: Reflection (22:33).",
+        "popularity": 5.9,
+        "poster_path": "/b43ueF4PDjKdDQ0xcKZ0lVvM6bJ.jpg",
+        "release_date": "2016-03-22",
+        "title": "Pawns No More: The Making of The Hunger Games: Mockingjay Part 2",
+        "video": True,
+        "vote_average": 7.6,
+        "vote_count": 8
+      }
+    ],
+    "total_pages": 1,
+    "total_results": 14
+    }
