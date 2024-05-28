@@ -1,6 +1,6 @@
 CREATE TABLE `Movie` (
   `MovieID` int NOT NULL AUTO_INCREMENT,
-  `DirectorID` int NOT NULL,
+  `DirectorID` int,
   `Title` varchar(50) NOT NULL,
   `ReleaseYear` year NOT NULL,
   PRIMARY KEY (`MovieID`)
@@ -10,6 +10,7 @@ CREATE TABLE `Director` (
   `DirectorID` int NOT NULL AUTO_INCREMENT,
   `FirstName` varchar(40) NOT NULL,
   `LastName` varchar(40) NOT NULL,
+  'BirthYear' year NOT NULL,
   PRIMARY KEY (`DirectorID`)
 );
 
