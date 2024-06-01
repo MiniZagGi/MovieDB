@@ -77,8 +77,18 @@ def get_movie_directors(api_key, movie_id):
     directors = [{'name': crew_member['name']} for crew_member in credits['crew'] if crew_member['job'] == 'Director']
     return directors
 
-def find_movie(cursor, title, release_year):
-    '''Search local database for movie and retuns that if found else None'''
+def find_movie_local(cursor, title, release_year):
+    '''
+    Search local database for a movie with the given title and release year.
+
+    Parameters:
+        cursor (cursor): The database cursor object.
+        title (str): The title of the movie to search for.
+        release_year (int): The release year of the movie to search for.
+
+    Returns:
+        int or None: The MovieID of the found local movie, or None if no movie is found.
+    '''
     select_query = """
         SELECT `MovieID` FROM `Movie` WHERE `Title` = %s AND `ReleaseYear` = %s
     """
@@ -87,7 +97,7 @@ def find_movie(cursor, title, release_year):
     return result[0] if result else None
 
 def insert_movie(cursor, title, release_year):
-    movie_id = find_movie(cursor, title, release_year)
+    movie_id = find_movie_local(cursor, title, release_year)
     if movie_id:
         return movie_id
     
