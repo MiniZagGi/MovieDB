@@ -32,7 +32,7 @@ def get_movie_details(api_key, title, year):
 
     return search_results['results']
 
-def get_movie_by_id(api_key, movie_id):
+def get_movie_info_by_id(api_key, movie_id):
     """
     Retrieves movie information from The Movie Database (TMDb) API based on the provided movie ID.
 
@@ -63,6 +63,19 @@ def get_movie_by_id(api_key, movie_id):
     return search_results
 
 def get_movie_directors(api_key, movie_id):
+    """
+    Retrieves the directors of a movie from the TMDb API.
+
+    Parameters:
+    - api_key (str): The API key for accessing the TMDb API.
+    - movie_id (int): The ID of the movie.
+
+    Returns:
+    - list: A list of dictionaries containing the names of the directors.
+
+    Raises:
+    - Exception: If there is an error fetching movie credits from the TMDb API.
+    """
     credits_url = f"https://api.themoviedb.org/3/movie/{movie_id}/credits"
     headers = {
         "Authorization": f"Bearer {api_key}"
@@ -74,11 +87,22 @@ def get_movie_directors(api_key, movie_id):
     
     credits = response.json()
     
+    # Gets the directors name from the credits and returns only directors
     directors = [{'name': crew_member['name']} for crew_member in credits['crew'] if crew_member['job'] == 'Director']
     return directors
 
-def find_movie(cursor, title, release_year):
-    '''Search local database for movie and retuns that if found else None'''
+def find_movie_local(cursor, title, release_year):
+    '''
+    Search local database for a movie with the given title and release year.
+
+    Parameters:
+        cursor (cursor): The database cursor object.
+        title (str): The title of the movie to search for.
+        release_year (int): The release year of the movie to search for.
+
+    Returns:
+        int or None: The MovieID of the found local movie, or None if no movie is found.
+    '''
     select_query = """
         SELECT `MovieID` FROM `Movie` WHERE `Title` = %s AND `ReleaseYear` = %s
     """
@@ -87,7 +111,19 @@ def find_movie(cursor, title, release_year):
     return result[0] if result else None
 
 def insert_movie(cursor, title, release_year):
-    movie_id = find_movie(cursor, title, release_year)
+    """
+    Inserts a movie into the database if it doesn't already exist.
+
+    Args:
+        cursor: The database cursor object.
+        title (str): The title of the movie.
+        release_year (int): The release year of the movie.
+
+    Returns:
+        int: The ID of the inserted movie for use in fx. relation tables like movie_director
+
+    """
+    movie_id = find_movie_local(cursor, title, release_year)
     if movie_id:
         return movie_id
     
@@ -209,22 +245,22 @@ def main():
             for i, movie in enumerate(search_results):
                 print(f"{i+1}. {movie['title']} (Release Date: {movie['release_date']})")
             
+            # Gets the user to select the movie index they want to add to database
             selected_movie_index = int(input("Select the movie number you want details for: ")) - 1
             selected_movie = search_results[selected_movie_index]
-            # Gets only the id value from the selected_movie. This is used to then search by ID
+            # Gets only the id value from the selected_movie. This is used to then search by ID on TMDB
             movie_id = selected_movie['id']
 
             # Get details of the chosen movie
-            movie_details = get_movie_by_id(api_key, movie_id)
+            movie_details = get_movie_info_by_id(api_key, movie_id)
             directors = get_movie_directors(api_key, movie_id)
-
-
+            # Print the movie details to screen
             printMovieDetails(movie_details, directors)
 
             # Insert the movie into the database or find the existing one. The movie_ID from local database is used to create a relationship with director
             movie_db_id = insert_movie(cursor, movie_details['title'], movie_details['release_date'].split('-')[0])
 
-            # Insert directors and their relationships with the movie
+            # Insert directors and their relationships with the movie. Loops them and then calls insert_director and insert_movie_director_relation to create a relectionshiop with the movie
             for director in directors:
                 director_id = insert_director(cursor, director['name'])
                 insert_movie_director_relation(cursor, movie_db_id, director_id)
