@@ -2,6 +2,17 @@ import requests
 import mysql.connector
 
 def get_movie_details(api_key, title, year):
+    """
+    Retrieves movie details from the TMDb API based on the provided title and year.
+
+    Parameters:
+    - api_key (str): The API key for accessing the TMDb API.
+    - title (str): The title of the movie to search for.
+    - year (int): The year of the movie to search for.
+
+    Returns:
+    - list: A list of movie details matching the search criteria. If no results are found, returns None.
+    """
     search_url = "https://api.themoviedb.org/3/search/movie"
     headers = {
         "Authorization": f"Bearer {api_key}"
@@ -21,6 +32,36 @@ def get_movie_details(api_key, title, year):
 
     return search_results['results']
 
+def get_movie_by_id(api_key, movie_id):
+    """
+    Retrieves movie information from The Movie Database (TMDb) API based on the provided movie ID.
+
+    Parameters:
+    - api_key (str): The API key for accessing TMDb API.
+    - movie_id (int): The ID of the movie to retrieve information for.
+
+    Returns:
+    - dict: A dictionary containing the movie information in JSON format.
+
+    Raises:
+    - Exception: If the API request fails or returns a non-200 status code.
+    """
+
+    # Construct the URL for the API request
+    search_url = f"https://api.themoviedb.org/3/movie/{movie_id}"
+
+    headers = {
+        "Authorization": f"Bearer {api_key}"
+    }
+    # Make the API request
+    response = requests.get(search_url, headers=headers)
+    if response.status_code != 200:
+        raise Exception("Error fetching data from TMDb API")
+    
+    search_results = response.json()
+
+    return search_results
+
 def get_movie_directors(api_key, movie_id):
     credits_url = f"https://api.themoviedb.org/3/movie/{movie_id}/credits"
     headers = {
@@ -37,6 +78,7 @@ def get_movie_directors(api_key, movie_id):
     return directors
 
 def find_movie(cursor, title, release_year):
+    '''Search local database for movie and retuns that if found else None'''
     select_query = """
         SELECT `MovieID` FROM `Movie` WHERE `Title` = %s AND `ReleaseYear` = %s
     """
@@ -57,6 +99,17 @@ def insert_movie(cursor, title, release_year):
     return cursor.lastrowid
 
 def insert_director(cursor, full_name):
+    """
+    Inserts a director into the database if they don't already exist and returns the DirectorID.
+
+    Args:
+        cursor: The database cursor object.
+        full_name (str): The full name of the director.
+
+    Returns:
+        int: The DirectorID of the inserted or existing director.
+    """
+    # Checks if the director exits
     first_name, last_name = full_name.split(' ', 1)
     select_query = """
         SELECT `DirectorID` FROM `Director` WHERE `FirstName` = %s AND `LastName` = %s
@@ -65,7 +118,7 @@ def insert_director(cursor, full_name):
     result = cursor.fetchone()
     if result:
         return result[0]
-
+    # Insert the new director
     insert_query = """
         INSERT INTO `Director` (`FirstName`, `LastName`)
         VALUES (%s, %s)
@@ -113,10 +166,27 @@ def update_backup_status(cursor, movie_id, media_type_id, status):
     """
     cursor.execute(update_query, (movie_id, media_type_id, status, status))
 
+def printMovieDetails(movie_details, directors):
+    """
+    Prints the details of a movie.
+
+    Args:
+        movie_details (dict): A dictionary containing the details of the movie.
+            It should have the following keys: 'title', 'release_date', 'overview', 'genres'.
+        directors (list): A list of dictionaries containing the details of the directors.
+            Each dictionary should have the key 'name'.
+
+    Returns:
+        None
+    """
+    print(f"Title: {movie_details['title']}")
+    print(f"Release Year: {movie_details['release_date'].split('-')[0]}")
+    print(f"Directors: {', '.join(director['name'] for director in directors)}")
+    print(f"Overview: {movie_details.get('overview', 'N/A')}")
+    print(f"Genres: {', '.join([genre['name'] for genre in movie_details.get('genres', [])])}")
+
 def main():
     api_key = "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI1MDZkZmY0MDJkNWFkNjZmZmZiODI5MTQwZjM3ZDM0ZCIsInN1YiI6IjY2MDBiYTAzNzcwNzAwMDE3YzBlMzI5NiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.Xg5LpL6NiJXcfV70lohf33uCfI0mq21K0wNdaDTDeAM"  # Replace with your TMDb Bearer token
-    title = input("Enter movie title: ")
-    year = input("Enter movie release year: ")
 
     # Database connection setup
     db_connection = mysql.connector.connect(
@@ -127,36 +197,31 @@ def main():
     )
     cursor = db_connection.cursor()
 
+    # Asks the user for a movie to search for
+    title = str(input("Enter movie title: "))
+    year = int(input("Enter movie release year: "))
+
     try:
+        # Processes the resutalt of the user search. Then makes a list to print
         search_results = get_movie_details(api_key, title, year)
         if search_results:
             print("Movies found:")
             for i, movie in enumerate(search_results):
                 print(f"{i+1}. {movie['title']} (Release Date: {movie['release_date']})")
             
-            choice = int(input("Select the movie number you want details for: ")) - 1
-            selected_movie = search_results[choice]
-
+            selected_movie_index = int(input("Select the movie number you want details for: ")) - 1
+            selected_movie = search_results[selected_movie_index]
+            # Gets only the id value from the selected_movie. This is used to then search by ID
             movie_id = selected_movie['id']
-            movie_details_url = f"https://api.themoviedb.org/3/movie/{movie_id}"
-            headers = {
-                "Authorization": f"Bearer {api_key}"
-            }
 
-            response = requests.get(movie_details_url, headers=headers)
-            if response.status_code != 200:
-                raise Exception("Error fetching movie details from TMDb API")
-
-            movie_details = response.json()
+            # Get details of the chosen movie
+            movie_details = get_movie_by_id(api_key, movie_id)
             directors = get_movie_directors(api_key, movie_id)
 
-            print(f"Title: {movie_details['title']}")
-            print(f"Release Year: {movie_details['release_date'].split('-')[0]}")
-            print(f"Directors: {', '.join(director['name'] for director in directors)}")
-            print(f"Overview: {movie_details.get('overview', 'N/A')}")
-            print(f"Genres: {', '.join([genre['name'] for genre in movie_details.get('genres', [])])}")
 
-            # Insert the movie into the database or find the existing one
+            printMovieDetails(movie_details, directors)
+
+            # Insert the movie into the database or find the existing one. The movie_ID from local database is used to create a relationship with director
             movie_db_id = insert_movie(cursor, movie_details['title'], movie_details['release_date'].split('-')[0])
 
             # Insert directors and their relationships with the movie
