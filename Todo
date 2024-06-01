@@ -1,0 +1,4 @@
+Make the backup section better.
+    Make it a function
+    Get backup media type from database instead of hardcoding it
+    It should be able to add new backup media types
