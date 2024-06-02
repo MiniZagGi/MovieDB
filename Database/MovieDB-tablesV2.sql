@@ -1,5 +1,5 @@
 CREATE TABLE `Director` (
-  `DirectorID` int,
+  `DirectorID` int NOT NULL AUTO_INCREMENT,
   `FirstName` varchar(40),
   `LastName` varchar(40),
   `BirthYear` year,
@@ -30,7 +30,10 @@ CREATE TABLE `MediaType` (
 CREATE TABLE `Movie_MediaType` (
   `Movie_MovieID` int NOT NULL,
   `MediaType_MediaTypeID` int NOT NULL,
-  `IsBackedUp` BOOLEAN DEFAULT FALSE,
+  `IsBackedUp` BOOLEAN NOT NULL DEFAULT FALSE,
+  `IsOwned` BOOLEAN NOT NULL DEFAULT TRUE,
+  `OwnedSince` DATETIME DEFAULT NULL,
+  `ThrownOutOn` DATETIME DEFAULT NULL,
   PRIMARY KEY (`Movie_MovieID`, `MediaType_MediaTypeID`),
   FOREIGN KEY (`Movie_MovieID`) REFERENCES `Movie`(`MovieID`),
   FOREIGN KEY (`MediaType_MediaTypeID`) REFERENCES `MediaType`(`MediaTypeID`)
