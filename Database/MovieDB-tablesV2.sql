@@ -32,6 +32,8 @@ CREATE TABLE `Movie_MediaType` (
   `MediaType_MediaTypeID` int NOT NULL,
   `IsBackedUp` BOOLEAN NOT NULL DEFAULT FALSE,
   `IsOwned` BOOLEAN NOT NULL DEFAULT TRUE,
+  `OwnedSince` DATETIME DEFAULT NULL,
+  `ThrownOutOn` DATETIME DEFAULT NULL,
   PRIMARY KEY (`Movie_MovieID`, `MediaType_MediaTypeID`),
   FOREIGN KEY (`Movie_MovieID`) REFERENCES `Movie`(`MovieID`),
   FOREIGN KEY (`MediaType_MediaTypeID`) REFERENCES `MediaType`(`MediaTypeID`)
