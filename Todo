@@ -3,6 +3,14 @@ Make the backup section better.
     Get backup media type from database instead of hardcoding it
     It should be able to add new backup media types
 
+Bug. Unread result found. 
+    Happens when the user searches for a movie that is not in the database
+    mysql.connector.errors.InternalError: Unread result found
+    
+    Get_avliable_media_types() is not working properly.
+    Trying featch all.
+    Error handling should be added to line 305-315
+
 
 Add a search function to the database
     Search by name
