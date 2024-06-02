@@ -1,7 +1,7 @@
 import requests
 import mysql.connector
 
-def get_movie_details(api_key, title, year):
+def get_movie_details(api_key: str, title: str, year):
     """
     Retrieves movie details from the TMDb API based on the provided title and year.
 
@@ -32,7 +32,7 @@ def get_movie_details(api_key, title, year):
 
     return search_results['results']
 
-def get_movie_info_by_id(api_key, movie_id):
+def get_movie_info_by_id(api_key, movie_id: int):
     """
     Retrieves movie information from The Movie Database (TMDb) API based on the provided movie ID.
 
@@ -134,7 +134,7 @@ def insert_movie(cursor, title, release_year):
     cursor.execute(insert_query, (title, release_year))
     return cursor.lastrowid
 
-def insert_director(cursor, full_name):
+def insert_director(cursor: str, full_name: str):
     """
     Inserts a director into the database if they don't already exist and returns the DirectorID.
 
@@ -178,6 +178,19 @@ def insert_movie_director_relation(cursor, movie_id, director_id):
     cursor.execute(insert_query, (movie_id, director_id))
 
 def get_media_type_id(cursor, media_type):
+    """
+    Retrieves the MediaTypeID from the database based on the given media_type.
+
+    Args:
+        cursor: The database cursor object.
+        media_type (str): The type of media.
+
+    Returns:
+        int: The MediaTypeID corresponding to the given media_type.
+
+    Raises:
+        ValueError: If the media_type is not found in the database.
+    """
     select_query = "SELECT `MediaTypeID` FROM `MediaType` WHERE `Type` = %s"
     cursor.execute(select_query, (media_type,))
     result = cursor.fetchone()
@@ -185,22 +198,70 @@ def get_media_type_id(cursor, media_type):
         return result[0]
     else:
         raise ValueError(f"Media type '{media_type}' not found in database")
+    
+def get_avalible_media_types(cursor):
+    """
+    Retrieves all available media types from the `MediaType` table.
+
+    Args:
+        cursor: The database cursor object.
+
+    Returns:
+        A tuple containing all the media types in the `MediaType` table.
+    """
+    select_query = "SELECT `Type` FROM `MediaType`"
+    cursor.execute(select_query)
+    result = cursor.fetchall()
+    # returns a tuple
+    return result
 
 def is_media_backed_up(cursor, movie_id, media_type_id):
+    """
+    Checks if a specific media type for a movie is backed up.
+
+    Args:
+        cursor: The database cursor object.
+        movie_id: The ID of the movie.
+        media_type_id: The ID of the media type.
+
+    Returns:
+        True if the media type is backed up, False if it is not backed up, or None if there is no entry for the given movie and media type.
+    """
     select_query = """
         SELECT `IsBackedUp` FROM `Movie_MediaType` WHERE `Movie_MovieID` = %s AND `MediaType_MediaTypeID` = %s
     """
     cursor.execute(select_query, (movie_id, media_type_id))
-    result = cursor.fetchone()
-    return result[0] if result else False
+    resultTuple = cursor.fetchone()
 
-def update_backup_status(cursor, movie_id, media_type_id, status):
+    # Returns true or false if there is a row in table else return None
+    if resultTuple is not None:
+        result = bool(resultTuple[0])
+        return result
+    else:
+         # returns None when a row with matching values does not exsit
+        return None
+
+def update_backup_status(cursor, movie_id, media_type_id, backup_status: bool, own_status: bool):
+    """
+    Updates the backup status and own status of a movie media type in the database.
+
+    Args:
+        cursor: The database cursor object.
+        movie_id: The ID of the movie.
+        media_type_id: The ID of the media type.
+        backup_status: The backup status to be updated (True or False).
+        own_status: The own status to be updated (True or False).
+
+    Returns:
+        None
+    """
     update_query = """
         INSERT INTO `Movie_MediaType` (`Movie_MovieID`, `MediaType_MediaTypeID`, `IsBackedUp`) 
         VALUES (%s, %s, %s)
-        ON DUPLICATE KEY UPDATE `IsBackedUp` = %s
+        ON DUPLICATE KEY UPDATE `IsBackedUp` = %s, `IsOwned` = %s
     """
-    cursor.execute(update_query, (movie_id, media_type_id, status, status))
+    # There is multiple backup status's as values gets used one by one. 
+    cursor.execute(update_query, (movie_id, media_type_id, backup_status, backup_status, own_status))
 
 def printMovieDetails(movie_details, directors):
     """
@@ -221,6 +282,14 @@ def printMovieDetails(movie_details, directors):
     print(f"Overview: {movie_details.get('overview', 'N/A')}")
     print(f"Genres: {', '.join([genre['name'] for genre in movie_details.get('genres', [])])}")
 
+def get_yes_or_no(prompt):
+    while True:
+        response = input(prompt).strip().lower()
+        if response in ['yes', 'no']:
+            return response
+        else:
+            print("Invalid input. Please enter 'yes' or 'no'.")
+
 def main():
     api_key = "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI1MDZkZmY0MDJkNWFkNjZmZmZiODI5MTQwZjM3ZDM0ZCIsInN1YiI6IjY2MDBiYTAzNzcwNzAwMDE3YzBlMzI5NiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.Xg5LpL6NiJXcfV70lohf33uCfI0mq21K0wNdaDTDeAM"  # Replace with your TMDb Bearer token
 
@@ -232,31 +301,37 @@ def main():
         database="MovieDB"
     )
     cursor = db_connection.cursor()
-
-    # Asks the user for a movie to search for
-    title = str(input("Enter movie title: "))
-    year = int(input("Enter movie release year: "))
-
     try:
-        # Processes the resutalt of the user search. Then makes a list to print
-        search_results = get_movie_details(api_key, title, year)
-        if search_results:
-            print("Movies found:")
-            for i, movie in enumerate(search_results):
-                print(f"{i+1}. {movie['title']} (Release Date: {movie['release_date']})")
-            
-            # Gets the user to select the movie index they want to add to database
-            selected_movie_index = int(input("Select the movie number you want details for: ")) - 1
-            selected_movie = search_results[selected_movie_index]
-            # Gets only the id value from the selected_movie. This is used to then search by ID on TMDB
-            movie_id = selected_movie['id']
+        while True:
+            # Asks the user for a movie to search for
+            title = str(input("Enter movie title: "))
+            # Allows year to be empty. Sets to None if input is not an int
+            try:
+                year = int(input("Enter movie release year: "))
+            except ValueError:
+                year = None
 
-            # Get details of the chosen movie
-            movie_details = get_movie_info_by_id(api_key, movie_id)
-            directors = get_movie_directors(api_key, movie_id)
-            # Print the movie details to screen
-            printMovieDetails(movie_details, directors)
+            # Processes the resutalt of the user search. Then makes a list to print
+            search_results = get_movie_details(api_key, title, year)
+            if search_results:
+                print("Movies found:")
+                for i, movie in enumerate(search_results):
+                    print(f"{i+1}. {movie['title']} (Release Date: {movie['release_date']})")
+                
+                # Gets the user to select the movie index they want to add to database
+                selected_movie_index = int(input("Select the movie number you want details for: ")) - 1
+                selected_movie = search_results[selected_movie_index]
+                # Gets only the id value from the selected_movie. This is used to then search by ID on TMDB
+                movie_id = selected_movie['id']
 
+                # Get details of the chosen movie
+                movie_details = get_movie_info_by_id(api_key, movie_id)
+                directors = get_movie_directors(api_key, movie_id)
+                # Print the movie details to screen
+                printMovieDetails(movie_details, directors)
+            else:
+                print("No movie found for the given title and year.")
+                
             # Insert the movie into the database or find the existing one. The movie_ID from local database is used to create a relationship with director
             movie_db_id = insert_movie(cursor, movie_details['title'], movie_details['release_date'].split('-')[0])
 
@@ -265,28 +340,32 @@ def main():
                 director_id = insert_director(cursor, director['name'])
                 insert_movie_director_relation(cursor, movie_db_id, director_id)
 
-            # Handle media types and backup statuses
-            media_types = ['DVD', 'Blu-Ray', 'UHD']
+            # Handles backup state and is_owned state
+            media_types = get_avalible_media_types(cursor)
             for media_type in media_types:
-                media_type_id = get_media_type_id(cursor, media_type)
+                media_type_id = get_media_type_id(cursor, media_type[0])
                 backed_up = is_media_backed_up(cursor, movie_db_id, media_type_id)
                 if backed_up is None:
-                    own_status = input(f"Do you own the movie in {media_type}? (yes/no): ").strip().lower() == 'yes'
+                    # Gets True if user inputs yes otherrise False
+                    own_status = get_yes_or_no(f"Do you own the movie in {media_type[0]}? (yes/no): ") == 'yes'
                     if own_status:
-                        is_backed_up = input(f"Has this movie been backed up on {media_type}? (yes/no): ").strip().lower() == 'yes'
-                        update_backup_status(cursor, movie_db_id, media_type_id, is_backed_up)
+                        is_backed_up = get_yes_or_no(f"Has this movie been backed up on {media_type[0]}? (yes/no): ") == 'yes'
+                        update_backup_status(cursor, movie_db_id, media_type_id, is_backed_up, own_status)
                 else:
-                    print(f"The movie is already backed up on {media_type}.")
-            
+                    print(f"The movie is already backed up on {media_type[0]}.")
+                    
+            # commits to database. Nothing is done to the database before it is commited
             db_connection.commit()
 
-        else:
-            print("No movie found for the given title and year.")
+            # Asks the user if there is more movies to add, if no then break out of the loop
+            if get_yes_or_no("Want to add another movie? ") == 'no':
+                break
     except Exception as e:
         print(str(e))
     finally:
         cursor.close()
         db_connection.close()
+        
 
 if __name__ == "__main__":
     main()
