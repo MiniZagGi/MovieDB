@@ -1,5 +1,11 @@
 import requests
 import mysql.connector
+from flask import Flask, render_template
+
+####
+
+####
+
 
 def get_movie_details(api_key: str, title: str, year):
     """
@@ -263,6 +269,16 @@ def update_backup_status(cursor, movie_id, media_type_id, backup_status: bool, o
     # There is multiple backup status's as values gets used one by one. 
     cursor.execute(update_query, (movie_id, media_type_id, backup_status, backup_status, own_status))
 
+def get_all_movies(cursor):
+    getMovies = """
+    SELECT `Title` FROM `Movie`
+"""
+    cursor.execute(getMovies)
+    resault = cursor.fetchall()
+
+    print(resault)
+    return resault
+
 def printMovieDetails(movie_details, directors):
     """
     Prints the details of a movie.
@@ -290,6 +306,28 @@ def get_yes_or_no(prompt):
         else:
             print("Invalid input. Please enter 'yes' or 'no'.")
 
+def jelly_movie_search(movie, payload, headers):
+    try:
+        url = f"https://jelly.local.mdal.dk/Items/?recursive=True&SourceType=Library&searchTerm={movie}&ParentId=ca66a3e7bbc66972778a197eb546edbf"
+        response = requests.request("GET", url, headers=headers, data=payload)
+    except requests.exceptions.RequestException as e:
+        print(f"HTTP request failed: {e}")
+        return False
+    try:
+        jelly_movie = response.json()
+    except ValueError as e:
+        print(f"Failed to decode JSON: {e}")
+        return False
+    try:
+        jelly_movie_name = jelly_movie['Items'][0]['Name']
+    except (KeyError, IndexError) as e:
+        print(f"Failed to access data from response: {e}")
+        return False
+    # check if movie is found and return
+    return jelly_movie_name == movie
+
+
+
 def main():
     api_key = "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI1MDZkZmY0MDJkNWFkNjZmZmZiODI5MTQwZjM3ZDM0ZCIsInN1YiI6IjY2MDBiYTAzNzcwNzAwMDE3YzBlMzI5NiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.Xg5LpL6NiJXcfV70lohf33uCfI0mq21K0wNdaDTDeAM"  # Replace with your TMDb Bearer token
 
@@ -301,6 +339,27 @@ def main():
         database="MovieDB"
     )
     cursor = db_connection.cursor()
+#### Jellyfin
+
+    payload = {}
+    headers = {
+    'Authorization': 'MediaBrowser Token=5731b055aaa14a49826f53b950b4c75d'
+    }
+
+
+    # ob = response.json()
+    # print(response.text)
+    # film = ob['Items'][0]
+    # print(film['Name'])
+
+    # Jelly is put here for now. Have to make a swtich later
+    
+    # Update the backup state if movie is found
+    movies = get_all_movies(cursor)
+    for movie in movies:
+        movieFound = jelly_movie_search(movie[0], payload, headers)
+        if movieFound == True:
+            print(f"{movie[0]} is found")
     try:
         while True:
             # Asks the user for a movie to search for
