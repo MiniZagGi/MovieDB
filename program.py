@@ -38,7 +38,7 @@ def get_movie_details(api_key: str, title: str, year):
 
     return search_results['results']
 
-def get_movie_info_by_id(api_key, movie_id: int):
+def get_movie_info_by_id(api_key: str, movie_id: int):
     """
     Retrieves movie information from The Movie Database (TMDb) API based on the provided movie ID.
 
@@ -68,7 +68,7 @@ def get_movie_info_by_id(api_key, movie_id: int):
 
     return search_results
 
-def get_movie_directors(api_key, movie_id):
+def get_movie_directors(api_key, movie_id: int):
     """
     Retrieves the directors of a movie from the TMDb API.
 
@@ -168,7 +168,7 @@ def insert_director(cursor: str, full_name: str):
     cursor.execute(insert_query, (first_name, last_name))
     return cursor.lastrowid
 
-def insert_movie_director_relation(cursor, movie_id, director_id):
+def insert_movie_director_relation(cursor, movie_id: int, director_id: int):
     select_query = """
         SELECT 1 FROM `Movie_Director` WHERE `Movie_MovieID` = %s AND `Director_DirectorID` = %s
     """
