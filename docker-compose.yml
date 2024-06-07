@@ -8,17 +8,44 @@ services:
       MYSQL_DATABASE: MovieDB
       MYSQL_USER: user
       MYSQL_PASSWORD: password
+    networks:
+      - proxy
+    labels:
+      - "traefik.enable=true"
+      # Configure load balancer for moviedb service
+
+      # - "traefik.tcp.routers.moviedb.rule=Host(`moviedb.local.mdal.dk`)"
+      # - "traefik.http.services.moviedb.loadbalancer.server.port=3306"
+
+      - "traefik.tcp.routers.moviedb.rule=HostSNI(`*`)"
+      - "traefik.tcp.services.moviedb.loadbalancer.server.port=3306"
+
+      - "traefik.docker.network=proxy"
+
+      # Enables logging to Loki
+      - "logging=promtail"
+      - "logging_jobname=containerlogs"
+
     volumes:
       - movie_data:/var/lib/mysql
     ports:
       - "3306:3306"
     restart: unless-stopped
+
   phpmyadmin:
-    image: phpmyadmin
+    image: phpmyadmin:latest
     restart: unless-stopped
     ports:
       - 8280:80
+    labels:
+      - "traefik.enable=true"
+
+      - "traefik.http.routers.pma.rule=Host(`pma.local.mdal.dk`)"
+      - "traefik.http.services.pma.loadbalancer.server.port=80"
+
     environment:
       #- PMA_ARBITRARY=1
       - PMA_HOST=db
-      
+networks:
+  proxy:
+    external: true
