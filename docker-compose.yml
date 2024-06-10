@@ -46,6 +46,21 @@ services:
       - "traefik.http.services.pma.loadbalancer.server.port=80"
       - "traefik.docker.network=proxy"
 
+      # Configure middleware for HTTPS redirection
+
+      - "traefik.http.middlewares.pma-https-redirect.redirectscheme.scheme=https"
+
+      - "traefik.http.routers.pma.middlewares=pma-https-redirect"
+
+      # Configure HTTPS router for pma
+
+      - "traefik.http.routers.pma-secure.entrypoints=https"
+
+      - "traefik.http.routers.pma-secure.rule=Host(`pma.local.mdal.dk`)"
+
+      - "traefik.http.routers.pma-secure.tls=true"
+
+      - "traefik.http.routers.pma-secure.service=pma"
     environment:
       #- PMA_ARBITRARY=1
       - PMA_HOST=db
