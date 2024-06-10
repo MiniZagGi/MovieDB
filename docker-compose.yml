@@ -35,6 +35,8 @@ services:
   phpmyadmin:
     image: phpmyadmin:latest
     restart: unless-stopped
+    networks:
+      - proxy
     ports:
       - 8280:80
     labels:
