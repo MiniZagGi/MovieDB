@@ -1,5 +1,6 @@
 import requests
 import mysql.connector
+import os
 
 def get_movie_details(api_key: str, title: str, year):
     """
@@ -291,11 +292,10 @@ def get_yes_or_no(prompt):
             print("Invalid input. Please enter 'yes' or 'no'.")
 
 def main():
-    api_key = "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI1MDZkZmY0MDJkNWFkNjZmZmZiODI5MTQwZjM3ZDM0ZCIsInN1YiI6IjY2MDBiYTAzNzcwNzAwMDE3YzBlMzI5NiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.Xg5LpL6NiJXcfV70lohf33uCfI0mq21K0wNdaDTDeAM"  # Replace with your TMDb Bearer token
-
+    api_key = os.getenv('TMDB_API_KEY')
     # Database connection setup
     db_connection = mysql.connector.connect(
-        host="localhost",
+        host="pma.local.mdal.dk",
         user="user",
         password="password",
         database="MovieDB"
