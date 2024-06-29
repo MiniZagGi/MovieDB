@@ -31,7 +31,12 @@ services:
     ports:
       - "3306:3306"
     restart: unless-stopped
-
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    
   phpmyadmin:
     image: phpmyadmin:latest
     restart: unless-stopped
@@ -64,6 +69,13 @@ services:
     environment:
       #- PMA_ARBITRARY=1
       - PMA_HOST=db
+
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "http://localhost"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      
 networks:
   proxy:
     external: true
