@@ -1,4 +1,5 @@
 import requests
+import os
 
 def search_movie(api_key: str, title: str, year):
   url = "https://jelly.local.mdal.dk/Items/"
@@ -19,31 +20,36 @@ def search_movie(api_key: str, title: str, year):
 
   return response
 
-api_key = "Token=5731b055aaa14a49826f53b950b4c75d"
-movie_title: str = "The hunger games"
-search_results = search_movie(api_key, movie_title, None)
-search_results = search_results.json()
-# movie = search_results["Items"][1]
-# print(movie['Name'])
-#print (type(search_results))
-#print(search_results)
+
+def main():
+  # Put your API in a varable and export it
+  api_key = os.getenv('JELLY_API_KEY')
+
+  # search for a movie
+  movie_title: str = "The hunger games"
+  search_results = search_movie(api_key, movie_title, None)
+  search_results = search_results.json()
+  # movie = search_results["Items"][1]
+  # print(movie['Name'])
+  #print (type(search_results))
+  #print(search_results)
 
 
-# Assuming search_results is a dictionary with a key 'Items' that contains a list
-for i, movie in enumerate(search_results.get('Items', [])):
-    # Assuming each movie in 'Items' is a dictionary that may have a 'Name' key
-    movie_name = movie.get('Name', 'Unknown title')
-    print(f"{i+1}. {movie_name}")
+  # Assuming search_results is a dictionary with a key 'Items' that contains a list
+  for i, movie in enumerate(search_results.get('Items', [])):
+      # Assuming each movie in 'Items' is a dictionary that may have a 'Name' key
+      movie_name = movie.get('Name', 'Unknown title')
+      print(f"{i+1}. {movie_name}")
 
 
 
 
 
-# for i, movie in enumerate(search_results):
-#    print(f"{i+1}. {movie['Items'][0]} (Name: {movie['Name']})")
-movies_list = [movie.get('Name') for movie in search_results["Items"]]
-for movie_title in movies_list:
-   print(movie_title)
+  # for i, movie in enumerate(search_results):
+  #    print(f"{i+1}. {movie['Items'][0]} (Name: {movie['Name']})")
+  movies_list = [movie.get('Name') for movie in search_results["Items"]]
+  for movie_title in movies_list:
+    print(movie_title)
 
 # # Assuming search_results is a dictionary with an "Items" key that contains a list of movies
 # for i, movie in enumerate(search_results["Items"]):
