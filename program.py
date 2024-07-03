@@ -305,7 +305,7 @@ def main():
         while True:
             # Asks the user for a movie to search for
             title = str(input("Enter movie title: "))
-            # Allows year to be empty. Sets to None if input is not an int
+            # Allows year to be empty. Sets to None if input is not an int like when the input is empty
             try:
                 year = int(input("Enter movie release year: "))
             except ValueError:
