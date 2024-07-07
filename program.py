@@ -24,8 +24,21 @@ def get_movie_details(api_key: str, title: str, year):
     }
     
     response = requests.get(search_url, headers=headers, params=params)
-    if response.status_code != 200:
-        raise Exception("Error fetching data from TMDb API")
+    if response.status_code == 200:
+        # Process successful response
+        pass
+    elif response.status_code == 400:
+        raise ValueError(f"400 Bad Request - The request was unacceptable, often due to missing a required parameter.")
+    elif response.status_code == 401:
+        raise PermissionError(f"401 Unauthorized - Invalid API key: You must be granted a valid key.")
+    elif response.status_code == 403:
+        raise PermissionError(f"403 Forbidden - The request is understood, but it has been refused or access is not allowed.")
+    elif response.status_code == 404:
+        raise FileNotFoundError(f"404 Not Found - The requested resource could not be found.")
+    elif response.status_code == 500:
+        raise Exception(f"500 Internal Server Error - Something went wrong on the API's end.")
+    else:
+        raise Exception(f"Error fetching data from TMDb API: {response.status_code}")
     
     search_results = response.json()
     if not search_results['results']:
@@ -56,8 +69,21 @@ def get_movie_info_by_id(api_key, movie_id: int):
     }
     # Make the API request
     response = requests.get(search_url, headers=headers)
-    if response.status_code != 200:
-        raise Exception("Error fetching data from TMDb API")
+    if response.status_code == 200:
+        # Process successful response
+        pass
+    elif response.status_code == 400:
+        raise ValueError(f"400 Bad Request - The request was unacceptable, often due to missing a required parameter.")
+    elif response.status_code == 401:
+        raise PermissionError(f"401 Unauthorized - Invalid API key: You must be granted a valid key.")
+    elif response.status_code == 403:
+        raise PermissionError(f"403 Forbidden - The request is understood, but it has been refused or access is not allowed.")
+    elif response.status_code == 404:
+        raise FileNotFoundError(f"404 Not Found - The requested resource could not be found.")
+    elif response.status_code == 500:
+        raise Exception(f"500 Internal Server Error - Something went wrong on the API's end.")
+    else:
+        raise Exception(f"Error fetching data from TMDb API: {response.status_code}")
     
     search_results = response.json()
 
