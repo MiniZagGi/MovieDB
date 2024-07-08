@@ -10,7 +10,7 @@ def search_movie(api_key: str, title: str, year):
   }
 
   params = {
-      #"recursive": True,
+      "recursive": True,
       "searchTerm": title,
       "years": year,
       "ParentId": "ca66a3e7bbc66972778a197eb546edbf"
@@ -26,7 +26,7 @@ def main():
   api_key = os.getenv('JELLY_API_KEY')
 
   # search for a movie
-  movie_title: str = "The hunger games"
+  movie_title: str = ""
   search_results = search_movie(api_key, movie_title, None)
   search_results = search_results.json()
   # movie = search_results["Items"][1]
@@ -36,10 +36,10 @@ def main():
 
 
   # Assuming search_results is a dictionary with a key 'Items' that contains a list
-  for i, movie in enumerate(search_results.get('Items', [])):
-      # Assuming each movie in 'Items' is a dictionary that may have a 'Name' key
-      movie_name = movie.get('Name', 'Unknown title')
-      print(f"{i+1}. {movie_name}")
+  # for i, movie in enumerate(search_results.get('Items', [])):
+  #     # Assuming each movie in 'Items' is a dictionary that may have a 'Name' key
+  #     movie_name = movie.get('Name', 'Unknown title')
+  #     print(f"{i+1}. {movie_name}")
 
 
 
@@ -58,3 +58,5 @@ def main():
 
 # Get a list of all movies from Jellyfin - DONE
 # Search the local DB for movies in the list
+if __name__ == "__main__":
+  main()
