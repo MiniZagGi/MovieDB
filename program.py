@@ -1,6 +1,7 @@
 import requests
 import mysql.connector
 import os
+import jellyfin
 
 def get_movie_details(api_key: str, title: str, year):
     """
@@ -316,6 +317,16 @@ def get_yes_or_no(prompt):
             return response
         else:
             print("Invalid input. Please enter 'yes' or 'no'.")
+
+# Adds a menu to be able to select which part of the program to run
+def main_menu():
+    print("1. Add a movie to the database")
+    print("2. Search the database")
+    choice = input("Enter your choice (1 or 2): ")
+    return choice
+
+
+
 
 def main():
     api_key = os.getenv('TMDB_API_KEY')
