@@ -325,7 +325,26 @@ def main_menu():
     choice = input("Enter your choice (1 or 2): ")
     return choice
 
+def get_user_input():
+    """
+    Prompts the user to enter a movie title and an optional release year.
 
+    This function asks the user to input a movie title and a release year. 
+    The title is required and will be stripped of leading and trailing whitespace. 
+    The year is optional; if the user does not enter a valid integer, the year will be set to None.
+
+    Returns:
+        tuple: A tuple containing the movie title (str) and the release year (int or None).
+    """
+    
+    # Asks the user for a movie to search for
+    title = str(input("Enter movie title: ").strip())
+    # Allows year to be empty. Sets to None if input is not an int like when the input is empty
+    try:
+        year = int(input("Enter movie release year: "))
+    except ValueError:
+        year = None
+    return title, year
 
 
 def main():
@@ -340,14 +359,8 @@ def main():
     cursor = db_connection.cursor()
     try:
         while True:
-            # Asks the user for a movie to search for
-            title = str(input("Enter movie title: "))
-            # Allows year to be empty. Sets to None if input is not an int like when the input is empty
-            try:
-                year = int(input("Enter movie release year: "))
-            except ValueError:
-                year = None
-
+            # Function to ask the user for the movie they want to search
+            title, year = get_user_input()
             # Processes the resutalt of the user search. Then makes a list to print
             search_results = get_movie_details(api_key, title, year)
             if search_results:
@@ -397,8 +410,11 @@ def main():
             # Asks the user if there is more movies to add, if no then break out of the loop
             if get_yes_or_no("Want to add another movie? ") == 'no':
                 break
+    # Error handling
+    except mysql.connector.Error as err:
+        print(f"Database error: {err}")
     except Exception as e:
-        print(str(e))
+        print(f"An error occurred: {e}")
     finally:
         cursor.close()
         db_connection.close()
