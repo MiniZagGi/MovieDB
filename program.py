@@ -319,11 +319,13 @@ def get_yes_or_no(prompt):
             print("Invalid input. Please enter 'yes' or 'no'.")
 
 # Adds a menu to be able to select which part of the program to run
-def main_menu():
-    print("1. Add a movie to the database")
-    print("2. Search the database")
-    choice = input("Enter your choice (1 or 2): ")
-    return choice
+def display_menu():
+    print("Menu:")
+    print("1. Insert movie into DB")
+    print("2. Search local DB for movie")
+    print("3. Jellyfin list to update local DB")
+    print("0. Exit")
+
 
 def get_user_input():
     """
@@ -375,48 +377,60 @@ def main():
     cursor = db_connection.cursor()
     try:
         while True:
-            # Function to ask the user for the movie they want to search
-            title, year = get_user_input()
-            # Processes the resutalt of the user search. Then makes a list to print
-            search_results = get_movie_details(api_key, title, year)
-            if search_results:
-                display_search_results(search_results)
-                selected_movie = select_movie(search_results)
-                movie_id = selected_movie['id']
-                movie_details = get_movie_info_by_id(api_key, movie_id)
-                directors = get_movie_directors(api_key, movie_id)
-                printMovieDetails(movie_details, directors)
-            else:
-                print("No movie found for the given title and year.")
-                
-            # Insert the movie into the database or find the existing one. The movie_ID from local database is used to create a relationship with director
-            movie_db_id = insert_movie(cursor, movie_details['title'], movie_details['release_date'].split('-')[0])
-
-            # Insert directors and their relationships with the movie. Loops them and then calls insert_director and insert_movie_director_relation to create a relectionshiop with the movie
-            for director in directors:
-                director_id = insert_director(cursor, director['name'])
-                insert_movie_director_relation(cursor, movie_db_id, director_id)
-
-            # Handles backup state and is_owned state
-            media_types = get_avalible_media_types(cursor)
-            for media_type in media_types:
-                media_type_id = get_media_type_id(cursor, media_type[0])
-                backed_up = is_media_backed_up(cursor, movie_db_id, media_type_id)
-                if backed_up is None:
-                    # Gets True if user inputs yes otherrise False
-                    own_status = get_yes_or_no(f"Do you own the movie in {media_type[0]}? (yes/no): ") == 'yes'
-                    if own_status:
-                        is_backed_up = get_yes_or_no(f"Has this movie been backed up on {media_type[0]}? (yes/no): ") == 'yes'
-                        update_backup_status(cursor, movie_db_id, media_type_id, is_backed_up, own_status)
-                else:
-                    print(f"The movie is already backed up on {media_type[0]}.")
+            display_menu()
+            choice = int(input("Enter your choise: "))
+            # Add movie to local DB by using TMDB API
+            if choice == 1:
                     
-            # commits to database. Nothing is done to the database before it is commited
-            db_connection.commit()
+                # Function to ask the user for the movie they want to search
+                title, year = get_user_input()
+                # Processes the resutalt of the user search. Then makes a list to print
+                search_results = get_movie_details(api_key, title, year)
+                # Gets the user to select a movie based on the resualt of the search from TMDB
+                if search_results:
+                    display_search_results(search_results)
+                    selected_movie = select_movie(search_results)
+                    movie_id = selected_movie['id']
+                    movie_details = get_movie_info_by_id(api_key, movie_id)
+                    directors = get_movie_directors(api_key, movie_id)
+                    printMovieDetails(movie_details, directors)
+                else:
+                    print("No movie found for the given title and year.")
+                    
+                # Insert the movie into the database or find the existing one. The movie_ID from local database is used to create a relationship with director
+                movie_db_id = insert_movie(cursor, movie_details['title'], movie_details['release_date'].split('-')[0])
 
-            # Asks the user if there is more movies to add, if no then break out of the loop
-            if get_yes_or_no("Want to add another movie? ") == 'no':
-                break
+                # Insert directors and their relationships with the movie. Loops them and then calls insert_director and insert_movie_director_relation to create a relectionshiop with the movie
+                for director in directors:
+                    director_id = insert_director(cursor, director['name'])
+                    insert_movie_director_relation(cursor, movie_db_id, director_id)
+
+                # Handles backup state and is_owned state
+                media_types = get_avalible_media_types(cursor)
+                for media_type in media_types:
+                    media_type_id = get_media_type_id(cursor, media_type[0])
+                    backed_up = is_media_backed_up(cursor, movie_db_id, media_type_id)
+                    if backed_up is None:
+                        # Gets True if user inputs yes otherrise False
+                        own_status = get_yes_or_no(f"Do you own the movie in {media_type[0]}? (yes/no): ") == 'yes'
+                        if own_status:
+                            is_backed_up = get_yes_or_no(f"Has this movie been backed up on {media_type[0]}? (yes/no): ") == 'yes'
+                            update_backup_status(cursor, movie_db_id, media_type_id, is_backed_up, own_status)
+                    else:
+                        print(f"The movie is already backed up on {media_type[0]}.")
+
+                # commits to database. Nothing is done to the database before it is commited
+                db_connection.commit()
+
+                # Asks the user if there is more movies to add, if no then break out of the loop
+                if get_yes_or_no("Want to add another movie? ") == 'no':
+                    break
+            # Search local DB for movie
+            elif choice == 2:
+                title, year = get_user_input()
+                movie_resualt = find_movie_local(cursor, title, year)
+                print({movie_resualt})
+
     # Error handling
     except mysql.connector.Error as err:
         print(f"Database error: {err}")
