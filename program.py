@@ -336,7 +336,7 @@ def get_user_input():
     Returns:
         tuple: A tuple containing the movie title (str) and the release year (int or None).
     """
-    
+
     # Asks the user for a movie to search for
     title = str(input("Enter movie title: ").strip())
     # Allows year to be empty. Sets to None if input is not an int like when the input is empty
@@ -345,6 +345,22 @@ def get_user_input():
     except ValueError:
         year = None
     return title, year
+
+def display_search_results(search_results):
+    print("Movies found:")
+    for i, movie in enumerate(search_results):
+        print(f"{i+1}. {movie['title']} (Release Date: {movie['release_date']})")
+
+def select_movie(search_results):
+    while True:
+        try:
+            selected_movie_index = int(input("Select the movie number you want details for: ")) - 1
+            if 0 <= selected_movie_index < len(search_results):
+                return search_results[selected_movie_index]
+            else:
+                print("Invalid selection. Please try again.")
+        except ValueError:
+            print("Invalid input. Please enter a number.")
 
 
 def main():
@@ -364,20 +380,11 @@ def main():
             # Processes the resutalt of the user search. Then makes a list to print
             search_results = get_movie_details(api_key, title, year)
             if search_results:
-                print("Movies found:")
-                for i, movie in enumerate(search_results):
-                    print(f"{i+1}. {movie['title']} (Release Date: {movie['release_date']})")
-                
-                # Gets the user to select the movie index they want to add to database
-                selected_movie_index = int(input("Select the movie number you want details for: ")) - 1
-                selected_movie = search_results[selected_movie_index]
-                # Gets only the id value from the selected_movie. This is used to then search by ID on TMDB
+                display_search_results(search_results)
+                selected_movie = select_movie(search_results)
                 movie_id = selected_movie['id']
-
-                # Get details of the chosen movie
                 movie_details = get_movie_info_by_id(api_key, movie_id)
                 directors = get_movie_directors(api_key, movie_id)
-                # Print the movie details to screen
                 printMovieDetails(movie_details, directors)
             else:
                 print("No movie found for the given title and year.")
